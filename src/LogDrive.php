@@ -63,7 +63,7 @@ abstract class LogDrive extends LogCollector implements LogDriveInterface
    *
    * @return string
    */
-  #[Override] public function getContextName(): string
+  private function getContextName(): string
   {
     if (isset($this->contextName)) {
       return $this->contextName;
@@ -110,7 +110,7 @@ abstract class LogDrive extends LogCollector implements LogDriveInterface
    * @param string $level 日志等级
    * @return void
    */
-  #[Override] final public function record(
+  #[Override] public function record(
     Stringable|string $message, array $context = [], string $level = 'info'
   ): void
   {
@@ -135,5 +135,44 @@ abstract class LogDrive extends LogCollector implements LogDriveInterface
   {
     $data = LogRecorder::createLogData($level, $message, $context);
     $this->save([$data]);
+  }
+
+  /**
+   * 格式化日志数据为字符串
+   *
+   * @access public
+   * @param array{
+   *    timestamp:int,
+   *    level:string,
+   *    message:string,
+   *    source:string,
+   *    context:array,
+   * } $logData 需要写入日志的记录
+   * @param string $formatRule 格式化规则，示例:[%timestamp][%level] %message : %context -in %source
+   * @return string
+   */
+  protected function formatLogDataToString(string $formatRule, array $logData): string
+  {
+    // 通过正则表达式匹配格式化规则中的占位符
+    preg_match_all('/%(\w+)/', $formatRule, $matches);
+    // 获取匹配到的占位符
+    $placeholders = $matches[1];
+    // 重新排序 $logData 数组的键
+    $sortedData = [];
+    foreach ($placeholders as $placeholder) {
+      if (array_key_exists($placeholder, $logData)) {
+        $sortedData[$placeholder] = $logData[$placeholder];
+        unset($logData[$placeholder]);
+      }
+    }
+    // 根据格式化规则生成新的字符串
+    $newStr = $formatRule;
+    foreach ($sortedData as $key => $value) {
+      $value = is_string($value)
+        ? $value
+        : json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+      $newStr = str_replace("%$key", (string)$value, $newStr);
+    }
+    return $newStr;
   }
 }

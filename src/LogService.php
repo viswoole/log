@@ -40,6 +40,5 @@ class LogService extends ServiceProvider
    */
   public function boot(): void
   {
-    $this->app->make('log');
   }
 }

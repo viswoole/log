@@ -13,11 +13,11 @@
 
 declare (strict_types=1);
 
-namespace ViSwoole\Log\Facade;
+namespace ViSwoole\Log;
 
 use ViSwoole\Core\ServiceProvider;
 use ViSwoole\Log\Contract\LogDriveInterface;
-use ViSwoole\Log\LogManager;
+use ViSwoole\Log\Facade\Log;
 
 class LogService extends ServiceProvider
 {

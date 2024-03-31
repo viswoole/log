@@ -21,6 +21,9 @@ use ViSwoole\Log\Contract\LogCollectorInterface;
 use ViSwoole\Log\Contract\LogDriveInterface;
 use ViSwoole\Log\Drives\File;
 
+/**
+ * 日志管理器
+ */
 class LogManager
 {
   /**

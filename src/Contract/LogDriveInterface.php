@@ -84,14 +84,4 @@ interface LogDriveInterface extends LogCollectorInterface
     array             $context = [],
     string            $level = 'info'
   ): void;
-
-  /**
-   * 清除日志
-   *
-   * @access public
-   * @param int|null $days 天数，大于该天数的文件视为过期
-   * @param string|null $level 错误级别
-   * @return void
-   */
-  public function clearExpireLog(?int $days = null, ?string $level = null): void;
 }

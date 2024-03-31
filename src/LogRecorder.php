@@ -30,7 +30,7 @@ class LogRecorder extends ArrayObject
   }
 
   /**
-   * 添加data
+   * 添加一个日志
    *
    * @param string $level 日志等级
    * @param string|Stringable $message 日志消息
@@ -44,30 +44,46 @@ class LogRecorder extends ArrayObject
   }
 
   /**
-   * @param string $level
-   * @param string|Stringable $message
-   * @param array $context
+   * 创建日志数据
+   *
+   * @param string $level 日志等级
+   * @param string|Stringable $message 日志描述
+   * @param array $context 日志附加上下文信息
    * @return array
    */
   public static function createLogData(
-    string $level, string|Stringable $message, array $context = []
+    string            $level,
+    string|Stringable $message,
+    array             $context = []
   ): array
   {
-    $data = [
+    $source = '';
+    // TODO 待实现日志来源跟踪
+    $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 4);
+    var_dump($backtrace);
+    return [
       'timestamp' => time(),
       'level' => $level,
-      'message' => (string)$message
+      'message' => (string)$message,
+      'source' => $source,
+      'context' => $context
     ];
-    if (isset($context['_source'])) {
-      $data['source'] = $context['_source'];
-      unset($context['_source']);
-    }
-    $data['context'] = $context;
-    return $data;
   }
 
   /**
-   * 清除data
+   * 协程上下文销毁时会自动触发
+   */
+  public function __destruct()
+  {
+    $logRecords = $this->getArrayCopy();
+    if (!empty($logRecords)) {
+      $this->drive->save($logRecords);
+    }
+    $this->clear();
+  }
+
+  /**
+   * 清除缓存的日志
    *
    * @return void
    */
@@ -76,16 +92,8 @@ class LogRecorder extends ArrayObject
     $this->exchangeArray([]);
   }
 
-  public function __destruct()
-  {
-    $logRecords = $this->getArrayCopy();
-    if (!empty($logRecords)) {
-      $this->drive->save($logRecords);
-    }
-  }
-
   /**
-   * 获取data
+   * 获取缓存的日志数据
    *
    * @return array
    */

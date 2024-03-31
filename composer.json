@@ -30,5 +30,12 @@
     "psr-4": {
       "ViSwoole\\Log\\Tests\\": "tests"
     }
+  },
+  "extra": {
+    "viswoole": {
+      "services": [
+        "ViSwoole\\Log\\LogService"
+      ]
+    }
   }
 }

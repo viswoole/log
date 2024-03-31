@@ -40,10 +40,19 @@ interface LogDriveInterface extends LogCollectorInterface
   public function getRecord(): array;
 
   /**
-   * 保存日志(协程结束内部自动调用)
+   * 保存日志(协程结束，日志记录器销毁时会自动调用该方法存储日志)
    *
    * @access public
-   * @param array $logRecords 日志记录数组 ['time'=>int,'level'=>string,'message'=>string,'context'=>[]]
+   * @param array{
+   *   int,
+   *   array{
+   *      timestamp:int,
+   *      level:string,
+   *      message:string,
+   *      source:string,
+   *      context:array,
+   *   }
+   * } $logRecords 需要写入日志的记录
    * @return void
    */
   public function save(array $logRecords): void;
@@ -77,9 +86,12 @@ interface LogDriveInterface extends LogCollectorInterface
   ): void;
 
   /**
-   * 获取上下文记录键
+   * 清除日志
    *
-   * @return string
+   * @access public
+   * @param int|null $days 天数，大于该天数的文件视为过期
+   * @param string|null $level 错误级别
+   * @return void
    */
-  public function getContextName(): string;
+  public function clearExpireLog(?int $days = null, ?string $level = null): void;
 }

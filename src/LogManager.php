@@ -58,10 +58,11 @@ class LogManager
   private array $type_channel;
 
   /**
-   * @param string $configPath 配置文件路径
+   * @param string|null $configPath 配置文件路径
    */
-  public function __construct(string $configPath = BASE_PATH . '/config/autoload/log.php')
+  public function __construct(string $configPath = null)
   {
+    if (is_null($configPath)) $configPath = getRootPath() . '/config/autoload/log.php';
     $config = [];
     if (is_file($configPath)) $config = include($configPath);
     if (!is_array($config)) $config = [];

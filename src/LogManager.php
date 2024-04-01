@@ -61,6 +61,10 @@ class LogManager
    * @var bool 是否记录日志来源
    */
   private bool $recordLogTraceSource;
+  /**
+   * @var bool 是否输出至控制台
+   */
+  private bool $toTheConsole;
 
   /**
    * @param string|null $configPath 配置文件路径
@@ -74,6 +78,7 @@ class LogManager
     $this->defaultChannel = $config['default'] ?? 'default';
     $this->type_channel = $config['type_channel'] ?? [];
     $this->recordLogTraceSource = $config['trace_source'] ?? false;
+    $this->toTheConsole = $config['console'] ?? false;
     $this->channels = $config['channels'] ?? [
       'default' => new File()
     ];
@@ -108,6 +113,31 @@ class LogManager
       }
     }
     return $result;
+  }
+
+  /**
+   * 创建日志数据
+   *
+   * @param string $level 日志等级
+   * @param string|Stringable $message 日志描述
+   * @param array $context 日志附加上下文信息
+   * @return array{timestamp: int, level: string, message: string, context: array,sourece: string}
+   */
+  public static function createLogData(
+    string            $level,
+    string|Stringable $message,
+    array             $context = []
+  ): array
+  {
+    $source = $context['__log_trace_source'] ?? '';
+    unset($context['__log_trace_source']);
+    return [
+      'timestamp' => time(),
+      'level' => $level,
+      'message' => (string)$message,
+      'context' => $context,
+      'source' => $source
+    ];
   }
 
   /**
@@ -225,6 +255,7 @@ class LogManager
   /**
    * 设置是否跟踪日志来源
    *
+   * @access public
    * @param bool $record
    * @return void
    */
@@ -236,10 +267,34 @@ class LogManager
   /**
    * 判断是否跟踪日志来源
    *
+   * @access public
    * @return bool 返回true标识需要跟踪日志来源
    */
   public function isTraceSource(): bool
   {
     return $this->recordLogTraceSource;
+  }
+
+  /**
+   * 判断是否输出到控制台
+   *
+   * @access public
+   * @return bool
+   */
+  public function isToConsole(): bool
+  {
+    return $this->toTheConsole;
+  }
+
+  /**
+   * 设置是否输出到控制台
+   *
+   * @access public
+   * @param bool $return
+   * @return void
+   */
+  public function setToConsole(bool $return = true): void
+  {
+    $this->toTheConsole = $return;
   }
 }

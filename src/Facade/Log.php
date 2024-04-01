@@ -25,7 +25,7 @@ use ViSwoole\Log\LogManager;
 /**
  * 日志门面类
  *
- * @method static void emergency(string $level, string|Stringable $message, array $context = []) 紧急情况。
+ * @method static void emergency(string|Stringable $message, array $context = []) 紧急情况。
  * @method static void log(string $level, string|Stringable $message, array $context = []) 记录具有任意级别的日志。
  * @method static void alert(string|Stringable $message, array $context = []) 必须立即采取行动。
  * @method static void critical(string|Stringable $message, array $context = []) 严重情况。

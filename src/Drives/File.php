@@ -16,6 +16,7 @@ declare (strict_types=1);
 namespace ViSwoole\Log\Drives;
 
 use Override;
+use Swoole\Coroutine;
 use Swoole\Timer;
 use ViSwoole\Log\LogDrive;
 
@@ -41,7 +42,7 @@ class File extends LogDrive
   )
   {
     // 启动定时器删除日志
-    $this->startDailyTimer();
+    if (Coroutine::getuid() !== -1) $this->startDailyTimer();
   }
 
   /**

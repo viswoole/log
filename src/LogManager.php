@@ -141,6 +141,40 @@ class LogManager
   }
 
   /**
+   * 输出日志到控制台
+   *
+   * @param string $level 日志等级
+   * @param string $content 日志内容
+   * @return void
+   */
+  public function echoConsole(string $level, string $content): void
+  {
+    if ($this->hasToConsole()) {
+      $color = match ($level) {
+        'emergency', 'alert', 'critical' => "\033[1;31m",
+        'debug' => "\033[0;37m",
+        'error' => "\033[0;31m",
+        'warning' => "\033[0;33m",
+        'notice' => "\033[0;34m",
+        'sql' => "\033[0;32m",
+        default => "\033[0m"
+      };
+      echo "$color$content\033[0m\n";
+    }
+  }
+
+  /**
+   * 判断是否输出到控制台
+   *
+   * @access public
+   * @return bool
+   */
+  public function hasToConsole(): bool
+  {
+    return $this->toTheConsole;
+  }
+
+  /**
    * 获取日志通道
    *
    * @access public
@@ -270,20 +304,9 @@ class LogManager
    * @access public
    * @return bool 返回true标识需要跟踪日志来源
    */
-  public function isTraceSource(): bool
+  public function hasTraceSource(): bool
   {
     return $this->recordLogTraceSource;
-  }
-
-  /**
-   * 判断是否输出到控制台
-   *
-   * @access public
-   * @return bool
-   */
-  public function isToConsole(): bool
-  {
-    return $this->toTheConsole;
   }
 
   /**
@@ -296,5 +319,44 @@ class LogManager
   public function setToConsole(bool $return = true): void
   {
     $this->toTheConsole = $return;
+  }
+
+  /**
+   * 格式化日志数据为字符串
+   *
+   * @access public
+   * @param array{
+   *    timestamp: int,
+   *    level: string,
+   *    message: string,
+   *    context: array,
+   *    source: string,
+   * } $logData 需要写入日志的记录
+   * @param string $formatRule 格式化规则，示例:[%timestamp][%level] %message : %context -in %source
+   * @return string
+   */
+  public function formatLogDataToString(string $formatRule, array $logData): string
+  {
+    // 通过正则表达式匹配格式化规则中的占位符
+    preg_match_all('/%(\w+)/', $formatRule, $matches);
+    // 获取匹配到的占位符
+    $placeholders = $matches[1];
+    // 重新排序 $logData 数组的键
+    $sortedData = [];
+    foreach ($placeholders as $placeholder) {
+      if (array_key_exists($placeholder, $logData)) {
+        $sortedData[$placeholder] = $logData[$placeholder];
+        unset($logData[$placeholder]);
+      }
+    }
+    // 根据格式化规则生成新的字符串
+    $newStr = $formatRule;
+    foreach ($sortedData as $key => $value) {
+      $value = is_string($value)
+        ? $value
+        : json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+      $newStr = str_replace("%$key", (string)$value, $newStr);
+    }
+    return $newStr;
   }
 }

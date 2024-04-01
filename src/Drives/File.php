@@ -18,6 +18,7 @@ namespace ViSwoole\Log\Drives;
 use Override;
 use Swoole\Coroutine;
 use Swoole\Timer;
+use ViSwoole\Log\Facade\Log;
 use ViSwoole\Log\LogDrive;
 
 class File extends LogDrive
@@ -152,7 +153,7 @@ class File extends LogDrive
       // 如果以json格式存储则直接转为json字符串
       $logString = $this->json
         ? json_encode($logItem, $this->json_flags)
-        : $this->formatLogDataToString($this->logFormat, $logItem);
+        : Log::formatLogDataToString($this->logFormat, $logItem);
       $logDir = $this->getLogDir($level);
       // 获取当前日志文件名
       $logFiles = glob("$logDir/*.log");

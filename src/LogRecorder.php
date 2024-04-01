@@ -18,6 +18,7 @@ namespace ViSwoole\Log;
 use ArrayObject;
 use Stringable;
 use ViSwoole\Log\Contract\LogDriveInterface;
+use ViSwoole\Log\Facade\Log;
 
 /**
  * 日志缓存记录器
@@ -51,6 +52,16 @@ class LogRecorder extends ArrayObject
     $logRecords = $this->getArrayCopy();
     if (!empty($logRecords)) {
       $this->drive->save($logRecords);
+      foreach ($logRecords as $logRecord) {
+        // 输出日志到控制台
+        Log::echoConsole(
+          $logRecord['level'],
+          Log::formatLogDataToString(
+            '[%timestamp][%level]: %message - %context -in %source',
+            $logRecord
+          )
+        );
+      }
     }
     $this->clear();
   }

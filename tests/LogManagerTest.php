@@ -36,7 +36,7 @@ class LogManagerTest extends TestCase
 
   public function testLogFacade()
   {
-    Log::info('test');
+    Log::error('test');
     Log::log('info', 'test');
     self::assertTrue(true);
   }

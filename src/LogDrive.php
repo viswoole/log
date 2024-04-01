@@ -20,7 +20,6 @@ use RuntimeException;
 use Stringable;
 use Swoole\Coroutine;
 use ViSwoole\Log\Contract\LogDriveInterface;
-use ViSwoole\Log\Facade\Log;
 
 /**
  * 日志驱动器基类
@@ -135,14 +134,15 @@ abstract class LogDrive extends LogCollector implements LogDriveInterface
   ): void
   {
     $data = LogManager::createLogData($level, $message, $context);
+    $this->save([$data]);
     // 输出日志到控制台
-    Log::echoConsole(
+    $data['timestamp'] = date('c', $data['timestamp']);
+    LogManager::echoConsole(
       $data['level'],
-      Log::formatLogDataToString(
+      LogManager::formatLogDataToString(
         '[%timestamp][%level]: %message - %context -in %source',
         $data
       )
     );
-    $this->save([$data]);
   }
 }

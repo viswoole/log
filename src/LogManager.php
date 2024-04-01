@@ -46,6 +46,10 @@ use ViSwoole\Log\Drives\File;
 class LogManager
 {
   /**
+   * @var bool 是否输出至控制台
+   */
+  private static bool $toTheConsole;
+  /**
    * @var LogDriveInterface[] 通道列表
    */
   private array $channels;
@@ -61,16 +65,13 @@ class LogManager
    * @var bool 是否记录日志来源
    */
   private bool $recordLogTraceSource;
-  /**
-   * @var bool 是否输出至控制台
-   */
-  private bool $toTheConsole;
 
   /**
    * @param string|null $configPath 配置文件路径
    */
   public function __construct(string $configPath = null)
   {
+    var_dump('管理类实例化');
     if (is_null($configPath)) $configPath = getRootPath() . '/config/autoload/log.php';
     $config = [];
     if (is_file($configPath)) $config = include($configPath);
@@ -78,7 +79,7 @@ class LogManager
     $this->defaultChannel = $config['default'] ?? 'default';
     $this->type_channel = $config['type_channel'] ?? [];
     $this->recordLogTraceSource = $config['trace_source'] ?? false;
-    $this->toTheConsole = $config['console'] ?? false;
+    self::$toTheConsole = $config['console'] ?? false;
     $this->channels = $config['channels'] ?? [
       'default' => new File()
     ];
@@ -148,24 +149,22 @@ class LogManager
    * @param string $content 日志内容
    * @return void
    */
-  public function echoConsole(string $color, string $content): void
+  public static function echoConsole(string $color, string $content): void
   {
-    if ($this->hasToConsole()) {
-      $console_color_pattern = '/^(\033)\[[0-9;]+m$/';
-      $isColor = preg_match($console_color_pattern, $color);
-      if (!$isColor) {
-        $color = match ($color) {
-          'emergency', 'alert', 'critical' => "\033[1;31m",
-          'debug' => "\033[0;37m",
-          'error' => "\033[0;31m",
-          'warning' => "\033[0;33m",
-          'notice' => "\033[0;34m",
-          'sql' => "\033[0;32m",
-          default => "\033[0m"
-        };
-      }
-      echo "$color$content\033[0m\n";
+    $console_color_pattern = '/^(\033)\[[0-9;]+m$/';
+    $isColor = preg_match($console_color_pattern, $color);
+    if (!$isColor) {
+      $color = match ($color) {
+        'emergency', 'alert', 'critical' => "\033[1;31m",
+        'debug' => "\033[0;37m",
+        'error' => "\033[0;31m",
+        'warning' => "\033[0;33m",
+        'notice' => "\033[0;34m",
+        'sql' => "\033[0;32m",
+        default => "\033[0m"
+      };
     }
+    echo "$color$content\033[0m\n";
   }
 
   /**
@@ -174,9 +173,60 @@ class LogManager
    * @access public
    * @return bool
    */
-  public function hasToConsole(): bool
+  public static function hasToConsole(): bool
   {
-    return $this->toTheConsole;
+    return self::$toTheConsole;
+  }
+
+  /**
+   * 设置是否输出到控制台
+   *
+   * @access public
+   * @param bool $return
+   * @return void
+   */
+  public static function setToConsole(bool $return = true): void
+  {
+    self::$toTheConsole = $return;
+  }
+
+  /**
+   * 格式化日志数据为字符串
+   *
+   * @access public
+   * @param array{
+   *    timestamp: int,
+   *    level: string,
+   *    message: string,
+   *    context: array,
+   *    source: string,
+   * } $logData 需要写入日志的记录
+   * @param string $formatRule 格式化规则，示例:[%timestamp][%level] %message : %context -in %source
+   * @return string
+   */
+  public static function formatLogDataToString(string $formatRule, array $logData): string
+  {
+    // 通过正则表达式匹配格式化规则中的占位符
+    preg_match_all('/%(\w+)/', $formatRule, $matches);
+    // 获取匹配到的占位符
+    $placeholders = $matches[1];
+    // 重新排序 $logData 数组的键
+    $sortedData = [];
+    foreach ($placeholders as $placeholder) {
+      if (array_key_exists($placeholder, $logData)) {
+        $sortedData[$placeholder] = $logData[$placeholder];
+        unset($logData[$placeholder]);
+      }
+    }
+    // 根据格式化规则生成新的字符串
+    $newStr = $formatRule;
+    foreach ($sortedData as $key => $value) {
+      $value = is_string($value)
+        ? $value
+        : json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+      $newStr = str_replace("%$key", (string)$value, $newStr);
+    }
+    return $newStr;
   }
 
   /**
@@ -312,56 +362,5 @@ class LogManager
   public function hasTraceSource(): bool
   {
     return $this->recordLogTraceSource;
-  }
-
-  /**
-   * 设置是否输出到控制台
-   *
-   * @access public
-   * @param bool $return
-   * @return void
-   */
-  public function setToConsole(bool $return = true): void
-  {
-    $this->toTheConsole = $return;
-  }
-
-  /**
-   * 格式化日志数据为字符串
-   *
-   * @access public
-   * @param array{
-   *    timestamp: int,
-   *    level: string,
-   *    message: string,
-   *    context: array,
-   *    source: string,
-   * } $logData 需要写入日志的记录
-   * @param string $formatRule 格式化规则，示例:[%timestamp][%level] %message : %context -in %source
-   * @return string
-   */
-  public function formatLogDataToString(string $formatRule, array $logData): string
-  {
-    // 通过正则表达式匹配格式化规则中的占位符
-    preg_match_all('/%(\w+)/', $formatRule, $matches);
-    // 获取匹配到的占位符
-    $placeholders = $matches[1];
-    // 重新排序 $logData 数组的键
-    $sortedData = [];
-    foreach ($placeholders as $placeholder) {
-      if (array_key_exists($placeholder, $logData)) {
-        $sortedData[$placeholder] = $logData[$placeholder];
-        unset($logData[$placeholder]);
-      }
-    }
-    // 根据格式化规则生成新的字符串
-    $newStr = $formatRule;
-    foreach ($sortedData as $key => $value) {
-      $value = is_string($value)
-        ? $value
-        : json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-      $newStr = str_replace("%$key", (string)$value, $newStr);
-    }
-    return $newStr;
   }
 }

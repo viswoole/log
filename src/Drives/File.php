@@ -23,7 +23,8 @@ use ViSwoole\Log\LogDrive;
 class File extends LogDrive
 {
   /**
-   * @param int $storageDays 日志存储的天数
+   * @param int $storageDays 日志存储的天数（仅在协程环境中有效）
+   * @param int $maxFiles 最大日志文件数量（针对日志级别）
    * @param int $fileSize 日志文件大小
    * @param string $dateFormat 日期格式传入timestamp为时间戳格式
    * @param string $logFormat 日志格式
@@ -33,6 +34,7 @@ class File extends LogDrive
    */
   public function __construct(
     protected int    $storageDays = 7,
+    protected int    $maxFiles = 30,
     protected int    $fileSize = 1024 * 1024 * 10,
     protected string $dateFormat = 'c',
     protected string $logFormat = '[%timestamp][%level] %message - %context - %source',
@@ -41,8 +43,12 @@ class File extends LogDrive
     protected string $log_dir = BASE_PATH . '/runtime/logs',
   )
   {
-    // 启动定时器删除日志
-    if (Coroutine::getuid() !== -1) $this->startDailyTimer();
+    // 启动定时器删除日志 非协程环境则只在服务启动时清除一次日志文件
+    if (Coroutine::getuid() !== -1) {
+      $this->startDailyTimer();
+    } else {
+      $this->clearExpireLog();
+    }
   }
 
   /**
@@ -136,6 +142,7 @@ class File extends LogDrive
    */
   #[Override] public function save(array $logRecords): void
   {
+    $oldestLogFile = [];
     foreach ($logRecords as $logItem) {
       $level = $logItem['level'];
       // 格式化日期
@@ -146,16 +153,29 @@ class File extends LogDrive
       $logString = $this->json
         ? json_encode($logItem, $this->json_flags)
         : $this->formatLogDataToString($this->logFormat, $logItem);
-      $dir = $this->getLogDir($level);
+      $logDir = $this->getLogDir($level);
       // 获取当前日志文件名
-      $logFiles = glob("$dir/*.log");
+      $logFiles = glob("$logDir/*.log");
       $logFileCount = count($logFiles);
-      $currentLogFile = "$dir/{$level}_$logFileCount.log";
+      $currentLogFile = "$logDir/{$level}_$logFileCount.log";
       if (!file_exists($currentLogFile) || filesize($currentLogFile) >= $this->fileSize) {
-        $currentLogFile = "$dir/" . $level . '_' . ($logFileCount + 1) . '.log';
+        $logFileCount++;
+        $currentLogFile = "$logDir/" . $level . '_' . $logFileCount . '.log';
       }
       file_put_contents($currentLogFile, $logString . PHP_EOL, FILE_APPEND);
+      if ($logFileCount > $this->maxFiles) {
+        // 按文件创建时间排序
+        usort($logFiles, function ($a, $b) {
+          return filemtime($a) <=> filemtime($b);
+        });
+        // 如果存在日志文件，则删除最早创建的一个
+        if (!empty($logFiles)) {
+          $oldestLogFile[] = array_shift($logFiles);
+        }
+      }
     }
+    // 遍历删除旧的日志文件
+    foreach ($oldestLogFile as $file) unlink($file);
     clearstatcache();
   }
 

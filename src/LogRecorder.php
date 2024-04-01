@@ -49,7 +49,7 @@ class LogRecorder extends ArrayObject
    * @param string $level 日志等级
    * @param string|Stringable $message 日志描述
    * @param array $context 日志附加上下文信息
-   * @return array
+   * @return array{timestamp: int, level: string, message: string, context: array,sourece: string}
    */
   public static function createLogData(
     string            $level,
@@ -63,8 +63,8 @@ class LogRecorder extends ArrayObject
       'timestamp' => time(),
       'level' => $level,
       'message' => (string)$message,
-      'source' => $source,
-      'context' => $context
+      'context' => $context,
+      'source' => $source
     ];
   }
 

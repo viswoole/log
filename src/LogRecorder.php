@@ -39,33 +39,8 @@ class LogRecorder extends ArrayObject
    */
   public function push(string $level, string|Stringable $message, array $context = []): void
   {
-    $data = self::createLogData(...func_get_args());
+    $data = LogManager::createLogData(...func_get_args());
     $this->offsetSet(null, $data);
-  }
-
-  /**
-   * 创建日志数据
-   *
-   * @param string $level 日志等级
-   * @param string|Stringable $message 日志描述
-   * @param array $context 日志附加上下文信息
-   * @return array{timestamp: int, level: string, message: string, context: array,sourece: string}
-   */
-  public static function createLogData(
-    string            $level,
-    string|Stringable $message,
-    array             $context = []
-  ): array
-  {
-    $source = $context['__log_trace_source'] ?? '';
-    unset($context['__log_trace_source']);
-    return [
-      'timestamp' => time(),
-      'level' => $level,
-      'message' => (string)$message,
-      'context' => $context,
-      'source' => $source
-    ];
   }
 
   /**

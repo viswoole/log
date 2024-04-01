@@ -16,6 +16,7 @@ declare (strict_types=1);
 namespace ViSwoole\Log\Tests;
 
 use PHPUnit\Framework\TestCase;
+use ViSwoole\Log\Facade\Log;
 use ViSwoole\Log\LogManager;
 
 class LogManagerTest extends TestCase
@@ -30,5 +31,13 @@ class LogManagerTest extends TestCase
     $logManager->critical('test');
     $logManager->alert('test');
     $logManager->emergency('test');
+    self::assertTrue(true);
+  }
+
+  public function testLogFacade()
+  {
+    Log::info('test');
+    Log::log('info', 'test');
+    self::assertTrue(true);
   }
 }

@@ -34,7 +34,7 @@ class File extends LogDrive
   public function __construct(
     protected int    $storageDays = 7,
     protected int    $fileSize = 1024 * 1024 * 10,
-    protected string $dateFormat = 'm',
+    protected string $dateFormat = 'c',
     protected string $logFormat = '[%timestamp][%level] %message - %context - %source',
     protected bool   $json = true,
     protected int    $json_flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,

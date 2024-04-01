@@ -125,11 +125,11 @@ class File extends LogDrive
    * @param array{
    *   int,
    *   array{
-   *      timestamp:int,
-   *      level:string,
-   *      message:string,
-   *      source:string,
-   *      context:array,
+   *      timestamp: int,
+   *      level: string,
+   *      message: string,
+   *      context: array,
+   *      source: string,
    *   }
    * } $logRecords 需要写入日志的记录
    * @return void

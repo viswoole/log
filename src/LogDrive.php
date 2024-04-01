@@ -142,11 +142,11 @@ abstract class LogDrive extends LogCollector implements LogDriveInterface
    *
    * @access public
    * @param array{
-   *    timestamp:int,
-   *    level:string,
-   *    message:string,
-   *    source:string,
-   *    context:array,
+   *    timestamp: int,
+   *    level: string,
+   *    message: string,
+   *    context: array,
+   *    source: string,
    * } $logData 需要写入日志的记录
    * @param string $formatRule 格式化规则，示例:[%timestamp][%level] %message : %context -in %source
    * @return string

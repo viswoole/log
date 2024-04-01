@@ -18,6 +18,7 @@ namespace ViSwoole\Log;
 use BadMethodCallException;
 use InvalidArgumentException;
 use Stringable;
+use ViSwoole\Core\Facade;
 use ViSwoole\Log\Contract\LogCollectorInterface;
 use ViSwoole\Log\Contract\LogDriveInterface;
 use ViSwoole\Log\Drives\File;
@@ -56,6 +57,10 @@ class LogManager
    * @var array{string,string} 日志类型指定通道
    */
   private array $type_channel;
+  /**
+   * @var bool 是否记录日志来源
+   */
+  private bool $recordLogTraceSource;
 
   /**
    * @param string|null $configPath 配置文件路径
@@ -68,6 +73,7 @@ class LogManager
     if (!is_array($config)) $config = [];
     $this->defaultChannel = $config['default'] ?? 'default';
     $this->type_channel = $config['type_channel'] ?? [];
+    $this->recordLogTraceSource = $config['trace_source'] ?? false;
     $this->channels = $config['channels'] ?? [
       'default' => new File()
     ];
@@ -154,10 +160,15 @@ class LogManager
   {
     if (method_exists(LogDriveInterface::class, $name)) {
       $level = null;
-      if (method_exists(LogCollectorInterface::class, $name)) {
-        $level = $name;
-      } elseif ($name === 'record' || $name === 'write') {
+      if ($name === 'record' || $name === 'write') {
         $level = $arguments[2] ?? 'info';
+        $arguments[1] = $this->getTraceSource($arguments[1] ?? []);
+      } elseif ($name === 'log') {
+        $level = $arguments[0] ?? null;
+        $arguments[2] = $this->getTraceSource($arguments[2] ?? []);
+      } elseif (method_exists(LogCollectorInterface::class, $name)) {
+        $level = $name;
+        $arguments[1] = $this->getTraceSource($arguments[1] ?? []);
       }
       if (isset($this->type_channel[$level])) {
         $channels = is_string($this->type_channel[$level])
@@ -173,6 +184,30 @@ class LogManager
       }
     }
     throw new BadMethodCallException("$name method not exists.");
+  }
+
+  /**
+   * 获取日志来源
+   *
+   * @param array $context 上下文
+   * @return array
+   */
+  private function getTraceSource(array $context = []): array
+  {
+    if ($this->recordLogTraceSource) {
+      $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 4);
+      foreach (array_reverse($backtrace) as $trace) {
+        if ($trace['class'] === Facade::class || $trace['class'] === self::class) {
+          $backtrace = $trace;
+          break;
+        }
+      }
+      $trace = ($backtrace['file'] ?? '') . ':' . ($backtrace['line']) ?? '';
+    } else {
+      $trace = '';
+    }
+    $context['__log_trace_source'] = $trace;
+    return $context;
   }
 
   /**

@@ -57,10 +57,8 @@ class LogRecorder extends ArrayObject
     array             $context = []
   ): array
   {
-    $source = '';
-    // TODO 待实现日志来源跟踪
-    $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 4);
-    var_dump($backtrace);
+    $source = $context['__log_trace_source'] ?? '';
+    unset($context['__log_trace_source']);
     return [
       'timestamp' => time(),
       'level' => $level,

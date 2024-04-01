@@ -17,12 +17,30 @@ namespace ViSwoole\Log;
 
 use BadMethodCallException;
 use InvalidArgumentException;
+use Stringable;
 use ViSwoole\Log\Contract\LogCollectorInterface;
 use ViSwoole\Log\Contract\LogDriveInterface;
 use ViSwoole\Log\Drives\File;
 
 /**
  * 日志管理器
+ *
+ * @method void emergency(string|Stringable $message, array $context = []) 紧急情况。
+ * @method void log(string $level, string|Stringable $message, array $context = []) 记录具有任意级别的日志。
+ * @method void alert(string|Stringable $message, array $context = []) 必须立即采取行动。
+ * @method void critical(string|Stringable $message, array $context = []) 严重情况。
+ * @method void error(string|Stringable $message, array $context = []) 不需要立即采取行动的运行时错误，但通常应记录和监视。
+ * @method void warning(string|Stringable $message, array $context = []) 不是错误的异常情况。
+ * @method void notice(string|Stringable $message, array $context = []) 正常但重要的事件。
+ * @method void info(string|Stringable $message, array $context = []) 有趣的事件。
+ * @method void debug(string|Stringable $message, array $context = []) 详细的调试信息。
+ * @method void sql(string|Stringable $message, array $context = []) SQL日志。
+ * @method void task(string|Stringable $message, array $context = []) 任务日志。
+ * @method void write(Stringable|string $message, array $context = [], string $level = LogLevel::INFO) 直接写入日志
+ * @method bool save(array $logRecords) 保存日志（无需手动调用, 协程结束会自动调用）
+ * @method bool clearRecord() 清除缓存日志
+ * @method array getRecord() 获取缓存日志ß
+ * ∂
  */
 class LogManager
 {

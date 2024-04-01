@@ -45,6 +45,8 @@ use ViSwoole\Log\LogManager;
  * @method static void setDefaultChannel(string $name) 设置默认日志通道
  * @method static void addChannel(string $name, LogDriveInterface $drive) 添加日志通道
  * @method static LogDriveInterface[]|null getChannels(?string $name = null) 获取日志通道
+ * @method static void setTraceSource(bool $record = false) 是否跟踪日志来源
+ * @method static bool isTraceSource() 判断是否跟中日志来源
  */
 class Log extends Facade
 {

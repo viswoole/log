@@ -162,13 +162,13 @@ class LogManager
       $level = null;
       if ($name === 'record' || $name === 'write') {
         $level = $arguments[2] ?? 'info';
-        $arguments[1] = $this->getTraceSource($arguments[1] ?? []);
+        $arguments[1] = $this->buildTraceSource($arguments[1] ?? []);
       } elseif ($name === 'log') {
         $level = $arguments[0] ?? null;
-        $arguments[2] = $this->getTraceSource($arguments[2] ?? []);
+        $arguments[2] = $this->buildTraceSource($arguments[2] ?? []);
       } elseif (method_exists(LogCollectorInterface::class, $name)) {
         $level = $name;
-        $arguments[1] = $this->getTraceSource($arguments[1] ?? []);
+        $arguments[1] = $this->buildTraceSource($arguments[1] ?? []);
       }
       if (isset($this->type_channel[$level])) {
         $channels = is_string($this->type_channel[$level])
@@ -187,12 +187,12 @@ class LogManager
   }
 
   /**
-   * 获取日志来源
+   * 在上下文中加入日志来源
    *
    * @param array $context 上下文
    * @return array
    */
-  private function getTraceSource(array $context = []): array
+  private function buildTraceSource(array $context = []): array
   {
     if ($this->recordLogTraceSource) {
       $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 4);
@@ -220,5 +220,26 @@ class LogManager
   {
     $this->hasChannel($channel, true);
     return $this->channels[$channel];
+  }
+
+  /**
+   * 设置是否跟踪日志来源
+   *
+   * @param bool $record
+   * @return void
+   */
+  public function setTraceSource(bool $record): void
+  {
+    $this->recordLogTraceSource = $record;
+  }
+
+  /**
+   * 判断是否跟踪日志来源
+   *
+   * @return bool 返回true标识需要跟踪日志来源
+   */
+  public function isTraceSource(): bool
+  {
+    return $this->recordLogTraceSource;
   }
 }

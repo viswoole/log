@@ -133,7 +133,7 @@ abstract class LogDrive extends LogCollector implements LogDriveInterface
     Stringable|string $message, array $context = [], string $level = 'info'
   ): void
   {
-    $data = LogRecorder::createLogData($level, $message, $context);
+    $data = LogManager::createLogData($level, $message, $context);
     $this->save([$data]);
   }
 

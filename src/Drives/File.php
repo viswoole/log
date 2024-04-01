@@ -38,7 +38,7 @@ class File extends LogDrive
     protected int    $maxFiles = 30,
     protected int    $fileSize = 1024 * 1024 * 10,
     protected string $dateFormat = 'c',
-    protected string $logFormat = '[%timestamp][%level]: %message - %context -in %source',
+    protected string $logFormat = '[%timestamp][%level]: %message %context in %source',
     protected bool   $json = true,
     protected int    $json_flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
     protected string $log_dir = BASE_PATH . '/runtime/logs',
@@ -93,19 +93,20 @@ class File extends LogDrive
       // 目录名则是日期
       $date = (int)basename($dateDir);
       // 如果当前日期减去目录日期 大于最大存储的过期天数 则删除日志
-      if ($currentDate - $date > $days) $this->rmdir($level);
+      if ($currentDate - $date > $days) $this->rmdir($dateDir, $level);
     }
   }
 
   /**
    * 递归删除目录下的文件
    *
-   * @param string|null $level 错误级别不传则删除所有日志
+   * @param string $dir 文件目录
+   * @param string|null $level
    * @return void
    */
-  private function rmdir(?string $level = null): void
+  private function rmdir(string $dir, ?string $level = null): void
   {
-    $dir = $level ? rtrim($this->log_dir, '/') . '/' . $level : $this->log_dir;
+    $dir = $level ? "$dir/$level" : $dir;
     if (is_dir($dir)) {
       // 列出指定路径内的文件和目录
       $resources = scandir($dir);

@@ -57,7 +57,7 @@ class LogRecorder extends ArrayObject
         LogManager::echoConsole(
           $logRecord['level'],
           LogManager::formatLogDataToString(
-            '[%timestamp][%level]: %message - %context -in %source',
+            '[%timestamp][%level]: %message %context in %source',
             $logRecord
           )
         );

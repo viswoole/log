@@ -140,7 +140,7 @@ abstract class LogDrive extends LogCollector implements LogDriveInterface
     LogManager::echoConsole(
       $data['level'],
       LogManager::formatLogDataToString(
-        '[%timestamp][%level]: %message - %context -in %source',
+        '[%timestamp][%level]: %message %context in %source',
         $data
       )
     );

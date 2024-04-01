@@ -71,7 +71,6 @@ class LogManager
    */
   public function __construct(string $configPath = null)
   {
-    var_dump('管理类实例化');
     if (is_null($configPath)) $configPath = getRootPath() . '/config/autoload/log.php';
     $config = [];
     if (is_file($configPath)) $config = include($configPath);
@@ -220,6 +219,8 @@ class LogManager
     }
     // 根据格式化规则生成新的字符串
     $newStr = $formatRule;
+    // 如果上下文为空则使用{}代替
+    empty($sortedData['context']) && $sortedData['context'] = '{}';
     foreach ($sortedData as $key => $value) {
       $value = is_string($value)
         ? $value

@@ -37,7 +37,7 @@ class File extends LogDrive
     protected int    $maxFiles = 30,
     protected int    $fileSize = 1024 * 1024 * 10,
     protected string $dateFormat = 'c',
-    protected string $logFormat = '[%timestamp][%level] %message - %context -in %source',
+    protected string $logFormat = '[%timestamp][%level]: %message - %context -in %source',
     protected bool   $json = true,
     protected int    $json_flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
     protected string $log_dir = BASE_PATH . '/runtime/logs',

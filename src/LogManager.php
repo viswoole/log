@@ -143,22 +143,27 @@ class LogManager
   /**
    * 输出日志到控制台
    *
-   * @param string $level 日志等级
+   * @access public
+   * @param string $color 输出的颜色，传入内置日志等级会有预设颜色
    * @param string $content 日志内容
    * @return void
    */
-  public function echoConsole(string $level, string $content): void
+  public function echoConsole(string $color, string $content): void
   {
     if ($this->hasToConsole()) {
-      $color = match ($level) {
-        'emergency', 'alert', 'critical' => "\033[1;31m",
-        'debug' => "\033[0;37m",
-        'error' => "\033[0;31m",
-        'warning' => "\033[0;33m",
-        'notice' => "\033[0;34m",
-        'sql' => "\033[0;32m",
-        default => "\033[0m"
-      };
+      $console_color_pattern = '/^(\033)\[[0-9;]+m$/';
+      $isColor = preg_match($console_color_pattern, $color);
+      if (!$isColor) {
+        $color = match ($color) {
+          'emergency', 'alert', 'critical' => "\033[1;31m",
+          'debug' => "\033[0;37m",
+          'error' => "\033[0;31m",
+          'warning' => "\033[0;33m",
+          'notice' => "\033[0;34m",
+          'sql' => "\033[0;32m",
+          default => "\033[0m"
+        };
+      }
       echo "$color$content\033[0m\n";
     }
   }

@@ -49,7 +49,7 @@ use ViSwoole\Log\LogManager;
  * @method static bool hasTraceSource() 判断是否跟中日志来源
  * @method static void setToConsole(bool $record = false) 设置是否输出到控制台
  * @method static bool hasToConsole() 是否输出到控制台
- * @method static void echoConsole(string $level, string $content) 输出日志到控制台
+ * @method static void echoConsole(string $color, string $content) 输出日志到控制台
  * @method static string formatLogDataToString(string $formatRule, array $logData) 格式化日志数据为字符串
  */
 class Log extends Facade

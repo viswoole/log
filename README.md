@@ -21,5 +21,5 @@ Log::notice('notice');
 Log::critical('critical');
 Log::alert('alert');
 Log::emergency('emergency');
-Log::log('level','自定义等级事件',['key'=>'value']); // 输出具有任意
+Log::log('level','自定义等级事件',['key'=>'value']); // 输出具有任意等级的日志
 ```

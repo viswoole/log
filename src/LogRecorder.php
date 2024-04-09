@@ -15,18 +15,18 @@ declare (strict_types=1);
 
 namespace ViSwoole\Log;
 
-use ArrayObject;
 use Stringable;
 use ViSwoole\Log\Contract\LogDriveInterface;
 
 /**
  * 日志缓存记录器
  */
-class LogRecorder extends ArrayObject
+class LogRecorder
 {
+  protected array $records = [];
+
   public function __construct(protected LogDriveInterface $drive)
   {
-    parent::__construct();
   }
 
   /**
@@ -40,7 +40,7 @@ class LogRecorder extends ArrayObject
   public function push(string $level, string|Stringable $message, array $context = []): void
   {
     $data = LogManager::createLogData(...func_get_args());
-    $this->offsetSet(null, $data);
+    $this->records[] = $data;
   }
 
   /**
@@ -48,7 +48,7 @@ class LogRecorder extends ArrayObject
    */
   public function __destruct()
   {
-    $logRecords = $this->getArrayCopy();
+    $logRecords = $this->records;
     if (!empty($logRecords)) {
       $this->drive->save($logRecords);
       foreach ($logRecords as $logRecord) {
@@ -73,7 +73,7 @@ class LogRecorder extends ArrayObject
    */
   public function clear(): void
   {
-    $this->exchangeArray([]);
+    $this->records = [];
   }
 
   /**
@@ -83,6 +83,6 @@ class LogRecorder extends ArrayObject
    */
   public function get(): array
   {
-    return $this->getArrayCopy();
+    return $this->records;
   }
 }

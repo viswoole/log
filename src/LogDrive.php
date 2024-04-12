@@ -83,7 +83,7 @@ abstract class LogDrive extends LogCollector implements LogDriveInterface
    */
   #[Override] public function getRecord(): array
   {
-    return $this->getRecorder()->getArrayCopy();
+    return $this->getRecorder()->get();
   }
 
   /**

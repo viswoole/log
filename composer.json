@@ -36,6 +36,9 @@
     "viswoole": {
       "services": [
         "\\ViSwoole\\Log\\LogService"
+      ],
+      "configs": [
+        "config"
       ]
     }
   }

@@ -66,15 +66,9 @@ class LogManager
    */
   private bool $recordLogTraceSource;
 
-  /**
-   * @param string|null $configPath 配置文件路径
-   */
-  public function __construct(string $configPath = null)
+  public function __construct()
   {
-    if (is_null($configPath)) $configPath = getRootPath() . '/config/autoload/log.php';
-    $config = [];
-    if (is_file($configPath)) $config = include($configPath);
-    if (!is_array($config)) $config = [];
+    $config = config('log');
     $this->defaultChannel = $config['default'] ?? 'default';
     $this->type_channel = $config['type_channel'] ?? [];
     $this->recordLogTraceSource = $config['trace_source'] ?? false;

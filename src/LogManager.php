@@ -151,7 +151,7 @@ class LogManager
         'emergency', 'alert', 'critical' => "\033[1;31m",
         'debug' => "\033[0;37m",
         'error' => "\033[0;31m",
-        'warning' => "\033[0;33m",
+        'warning', 'task' => "\033[0;33m",
         'notice' => "\033[0;34m",
         'sql' => "\033[0;32m",
         default => "\033[0m"

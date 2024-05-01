@@ -201,27 +201,31 @@ class LogManager
   {
     // 通过正则表达式匹配格式化规则中的占位符
     preg_match_all('/%(\w+)/', $formatRule, $matches);
-    // 获取匹配到的占位符
-    $placeholders = $matches[1];
-    // 重新排序 $logData 数组的键
-    $sortedData = [];
-    foreach ($placeholders as $placeholder) {
-      if (array_key_exists($placeholder, $logData)) {
-        $sortedData[$placeholder] = $logData[$placeholder];
-        unset($logData[$placeholder]);
+    if (!empty($matches[1])) {
+      // 获取匹配到的占位符
+      $placeholders = $matches[1];
+      // 重新排序 $logData 数组的键
+      $sortedData = [];
+      foreach ($placeholders as $placeholder) {
+        if (array_key_exists($placeholder, $logData)) {
+          $sortedData[$placeholder] = $logData[$placeholder];
+          unset($logData[$placeholder]);
+        }
       }
+      // 根据格式化规则生成新的字符串
+      $newStr = $formatRule;
+      // 如果上下文为空则使用{}代替
+      empty($sortedData['context']) && $sortedData['context'] = '{}';
+      foreach ($sortedData as $key => $value) {
+        $value = is_string($value)
+          ? $value
+          : json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $newStr = str_replace("%$key", (string)$value, $newStr);
+      }
+      return $newStr;
+    } else {
+      return $formatRule;
     }
-    // 根据格式化规则生成新的字符串
-    $newStr = $formatRule;
-    // 如果上下文为空则使用{}代替
-    empty($sortedData['context']) && $sortedData['context'] = '{}';
-    foreach ($sortedData as $key => $value) {
-      $value = is_string($value)
-        ? $value
-        : json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-      $newStr = str_replace("%$key", (string)$value, $newStr);
-    }
-    return $newStr;
   }
 
   /**
